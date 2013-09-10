@@ -202,6 +202,70 @@ class WebApiContext extends BehatContext
         }
     }
 
+	/**
+	 * Checks that response body contains part of JSON from PyString.
+	 *
+	 * @param PyStringNode $jsonString
+	 *
+	 * @Then /^(?:the )?response should contain part of json:$/
+	 */
+	public function theResponseShouldContainPartOfJson(PyStringNode $jsonString)
+	{
+		$etalon = json_decode($this->replacePlaceHolder($jsonString->getRaw()), true);
+		$actual = json_decode($this->browser->getLastResponse()->getContent(), true);
+
+		if (null === $etalon) {
+			throw new \RuntimeException(
+				"Can not convert etalon to json:\n".$this->replacePlaceHolder($jsonString->getRaw())
+			);
+		}
+
+		assertTrue($this->findArray($actual, $etalon));
+	}
+
+	/**
+	 * iterate through actual array
+	 *
+	 * @param $actual   array
+	 * @param $etalon   array
+	 *
+	 * @return bool
+	 */
+	protected function findArray($actual, $etalon) {
+		// found in array
+		if ($this->findInArray($actual, $etalon)) {
+			return true;
+		}
+
+		// not found, look within
+		foreach ($actual as $key => $item) {
+			if (is_array($item)) {
+				if ($this->findInArray($item, $etalon)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * look if etalon is within actual array
+	 *
+	 * @param $actual
+	 * @param $etalon
+	 *
+	 * @return bool
+	 */
+	protected function findInArray($actual, $etalon) {
+		foreach ($etalon as $key => $item) {
+			if (!array_key_exists($key, $actual) || $actual[$key] != $item) {
+				return false;
+			}
+		}
+		return true;
+	}
+
     /**
      * Prints last response body.
      *
