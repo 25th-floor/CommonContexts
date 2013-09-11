@@ -192,6 +192,35 @@ class WebApiContext extends BehatContext
 	}
 
 	/**
+	/**
+	 * Checks that response Header contains specific text.
+	 *
+	 * @param string $header
+	 *
+	 * @param string $type
+	 *
+	 * @Then /^(?:the )?response header "([^"]*)" should contain "([^"]*)"$/
+	 */
+	public function theResponseHeaderShouldContain($header, $type)
+	{
+		assertRegExp('/'.preg_quote($type).'/', $this->browser->getLastResponse()->getHeader($header));
+	}
+
+	/**
+	 * Checks that response Header doesn't contains specific text.
+	 *
+	 * @param string $header
+	 *
+	 * @param string $type
+	 *
+	 * @Then /^(?:the )?response header "([^"]*)" should not contain "([^"]*)"$/
+	 */
+	public function theResponseHeaderShouldNotContain($header, $type)
+	{
+		assertNotRegExp('/'.preg_quote($type).'/', $this->browser->getLastResponse()->getHeader($header));
+	}
+
+	/**
      * Checks that response body contains JSON from PyString.
      *
      * @param PyStringNode $jsonString
